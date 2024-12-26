@@ -13,6 +13,11 @@ local validate_sound_directory = function(sound_directory)
 		error("beepboop.nvim: Could not find sound_directory \"" .. sound_directory .. "\"", 1)
 		return nil
 	end
+
+	if string.sub(sound_directory, #sound_directory) ~= "/" then
+		sound_directory = sound_directory .. "/"
+	end
+
 	return sound_directory
 end
 
@@ -45,7 +50,7 @@ local validate_audio_player = function(audio_player)
 end
 
 -- { auto_command = "", sound = "chestopen.oga" },
--- { key_press = {"n", "j"}, sounds = {"hit1.oga", "hit2.oga", "hit3.oga"} },
+-- { key_map = { mode = "n", key_cord = "j" }, sounds = {"hit1.oga", "hit2.oga", "hit3.oga"} },
 -- { trigger_name = "chestopen", sound = "hit1.oga" },
 
 local validate_sound_map = function(sound_map, sound_directory)
@@ -88,6 +93,8 @@ local validate_sound_map = function(sound_map, sound_directory)
 			auto_command = map.auto_command,
 			key_press = map.key_press,
 			audio_files = audio_files,
+			key_map = map.key_map,
+			volume = eggutils.clamp(map.volume or 100, 0, 100),
 		}
 	end
 
@@ -98,49 +105,50 @@ end
 
 local get_audio_player_callback = (function(audio_player, sound_directory)
 	if audio_player == "paplay" then
-		return (function(audio_files)
+		return (function(audio_files, sound_volume)
 			if not M.sound_enabled then return end
 			os.execute("paplay " ..
 				sound_directory ..
 				audio_files[math.random(#audio_files)] ..
 				" --volume=" ..
-				(M.volume * 65536) ..
+				((sound_volume / 100) * (M.volume / 100) * 65536) ..
 				" &"
 			)
 		end)
 	elseif audio_player == "pw-play" then
 	elseif audio_player == "mpv" then
-		return (function(audio_files)
+		return (function(audio_files, sound_volume)
 			if not M.sound_enabled then return end
 			os.execute("mpv " ..
 				sound_directory ..
 				audio_files[math.random(#audio_files)] ..
 				" --volume=" ..
-				M.volume * 100 ..
+				((sound_volume / 100) * M.volume) ..
 				" --msg-level=all=no 2> /dev/null &"
 			)
 		end)
 	elseif audio_player == "ffplay" then
 		-- TODO: curosr keeps sliding down when sounds are played
-		return (function(audio_files)
+		return (function(audio_files, sound_volume)
 			if not M.sound_enabled then return end
 			os.execute("ffplay " ..
 				sound_directory ..
 				audio_files[math.random(#audio_files)] ..
 				" -volume " ..
-				(M.volume * 100) ..
+				((sound_volume / 100) * M.volume) ..
 				" -loglevel -8 -nodisp -autoexit > /dev/null &"
 			)
 		end)
 	elseif audio_player == "afplay" then
-		return (function(audio_files)
+		return (function(audio_files, sound_volume)
 			-- TODO: handle logorithmic sound
 			-- can currently only use wav and mp3 files on mac
+			if not M.sound_enabled then return end
 			os.execute("afplay" ..
 				sound_directory ..
 				audio_files[math.random(#audio_files)] ..
 				" -volume " ..
-				M.volume ..
+				((sound_volume / 100) * (M.volume / 100)) ..
 				" &"
 			)
 		end)
@@ -161,11 +169,12 @@ local initialize_user_commands = (function()
 	end, {})
 
 	vim.api.nvim_create_user_command("BeepBoopVolume", function(args)
-		if tonumber(args.fargs[1]) == nil then
+		local new_volume = tonumber(args.fargs[1])
+		if new_volume == nil then
 			error("beepboop.nvim: Please provide the volume as a number between 0.0-1.0", 1)
 			return
 		end
-		M.volume = tonumber(args.fargs[1])
+		M.volume = eggutils.clamp(new_volume, 0, 100)
 	end, { nargs = "+" })
 end)
 
@@ -185,10 +194,49 @@ local initialize_auto_commands = (function(sound_map)
 	end
 end)
 
+local initialize_key_maps = (function(sound_map)
+	for trigger_name, sound in pairs(sound_map) do
+		if sound.key_map then
+			local existing = vim.fn.maparg(sound.key_map.key_chord, sound.key_map.mode, false, true)
+			local callback = function ()
+				M.play_audio(trigger_name)
+			end
+
+			if vim.tbl_isempty(existing) then
+				vim.keymap.set(sound.key_map.mode, sound.key_map.key_chord, callback)
+				return
+			end
+
+			-- TODO: Sould learn what are and consider expressions
+			local chained_func = function()
+				if existing.rhs then
+					vim.api.nvim_feedkeys(
+						vim.api.nvim_replace_termcodes(existing.rhs, true, true, true),
+						'n',
+						true
+					)
+				else
+					existing.callback()
+				end
+
+				callback()
+			end
+
+			vim.keymap.set(sound.key_map.mode, sound.key_map.key_chord, chained_func)
+		end
+	end
+end)
+
 -- ##################### SETUP #####################
 
 M.play_audio = function(trigger_name)
-	M.audio_player_callback(M.sound_map[trigger_name].audio_files)
+	if M.sound_map[trigger_name] then
+		M.audio_player_callback(M.sound_map[trigger_name].audio_files, M.sound_map[trigger_name].volume)
+	else
+		if not M.suppress_warnings then
+			error("beepboop.nvim: Attempted to trigger sound \"" .. trigger_name .. "\", which hasn'y been defined. Set \"supress_warnings = true\" in your config if this is intentional", 1)
+		end
+	end
 end
 
 M.setup = (function(opts)
@@ -203,7 +251,6 @@ M.setup = (function(opts)
 	if audio_player == nil then return end
 
 	M.audio_player_callback = get_audio_player_callback(audio_player, sound_directory)
-	if M.audio_player_callback == nil then return end -- shouldn't return nil
 
 	local sound_map = validate_sound_map(opts.sound_map, sound_directory)
 	if sound_map == nil then return end;
@@ -212,11 +259,18 @@ M.setup = (function(opts)
 	M.audio_player = audio_player
 	M.sound_map = sound_map
 
-	M.sound_enabled = opts.sound_enabled or true -- sound_enabled defaults true
-	M.volume = opts.volume or 1.0 -- volume defaults 1.0
+	-- sound_enabled defaults to true
+	if opts.sound_enabled == nil then
+		M.sound_enabled = true
+	else
+		M.sound_enabled = opts.sound_enabled
+	end
+
+	M.volume = eggutils.clamp(opts.volume or 100, 0, 100) -- volume defaults 100
 
 	initialize_user_commands()
 	initialize_auto_commands(sound_map)
+	initialize_key_maps(sound_map)
 end)
 
 return M

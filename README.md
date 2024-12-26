@@ -6,24 +6,24 @@ BeepBoop is a neovim plugin intended to make it easy to incorporate audio cues i
 
 ## Installation instructions
 
-1. Get the plugin into your config
+## I. Get the plugin into your config
 Include the following in your `lazy.nvim` config:
 ```lua
-	{
-        "EggbertFluffle/beepboop.nvim",
-		config = (function()
-			require("beepboop").setup({
-				audio_player = "pwplay",
-				sound_map = {
-                    -- SOUND MAP DEFENITIONS HERE
-				}
-			})
-		end),
-	}
+{
+    "EggbertFluffle/beepboop.nvim",
+    config = (function()
+        require("beepboop").setup({
+            audio_player = "pwplay",
+            sound_map = {
+                -- SOUND MAP DEFENITIONS HERE
+            }
+        })
+    end),
+}
 ```
 
-2. Create your sound maps
-A sound map can be made in several different ways. The first and main way is to attach them to a neovim `auto_command`. There is a list of commonly used auto_commands and what they do (MAKE A LINK TO THE BOTTOM OF THE README) here. 
+## II. Create your sound maps
+A sound map can be made in several different ways. The first way is to attach them to a neovim `auto_command`. A list of all the auto_commands in neovim can be found here (https://neovim.io/doc/user/autocmd.html)[here].
 ```lua
 {
     sound_map = {
@@ -47,62 +47,48 @@ vim.keymap.set("n", "<leader>boom", function() -- just an example of how it *cou
 end)
 ```
 
-Of course you can give a sound auto_commands, key_presses(tbd), and or a trigger and trigger the sound any way you like. Sounds can either be defined at `sound = "SOUND NAME"` which will play the defined sound when the sound map is triggered in some whay. The other option is to use sounds, which will play a random defined sound from the list when the sound_map is triggered, defined like so, `sounds = { "SOUND NAME", "OTHER SOUND NAME", "ONE MORE HEHE" }`.
+The third way is to use `key_maps` which are very simmilar to `vim.keymap.set("mode", "keychord", "rhs")`.
+```lua
+{
+    { key_map = { mode = "n", key_chord = "<leader>pv" }, sound = "chestopen.oga" },
+    { key_map = { mode = "n", key_chord = "<C-Enter>" }, sounds = {"stone1.oga", "stone2.oga", "stone3.oga", "stone4.oga"} },
+}
+```
+These won't override previously defined keymaps for those keychords, but other keymap defenitions *WILL* override these! To avoid this just ensure that your config for beepboop.nvim runs after any keymaps you don't want to override.
+
+Sounds can either be defined at `sound = "SOUND NAME"` which will play the defined sound when the sound map is triggered in some whay. The other option is to use sounds, which will play a random defined sound from the list when the sound_map is triggered, defined like so, `sounds = { "SOUND NAME", "OTHER SOUND NAME", "ONE MORE HEHE" }`.
 
 3. Choose your `audio_player` based on operating system. This is the program that beepboop will call to play the audio files you give it.
 
 ### Linux
 
-* paplay - PulseAudio
-For PulseAudio, the program `paplay` works flawlessly.
-
-```lua
-{
-    audio_player = "paplay",
-}
-```
-
-* ffplay - FFmpeg
-To use ffplay, ensure you have FFmpeg install with your distrobutions package manager.
-```lua
-{
-    audio_player = "ffplay",
-}
-```
-
-* mpv - mpv
-To use mpv, install it with your distributions package manager.
-```lua
-{
-    audio_player = "mpv",
-}
-```
+* paplay - For PulseAudio, the program `paplay` works flawlessly
+* ffplay - Comes with your distro's FFmpeg package
+* mpv - Comes in mpv package, very good video player as well
 
 ### Mac
 
-* afplay - macOS
-The program `afplay` comes default on al macs. the drawback is that as far as I can tell it ***only supports .mp3 and .wav file types***.
-```lua
-{
-    audio_player = "afplay",
-}
-```
-
-* other programs
-FFmpeg's ffplay and mpv should work on mac as well if they are installed, but haven't been tested.
+* afplay - Default on MacOS, but as far as I can tell **only supports .mp3 and .wav file types**.
+* paplay - For PulseAudio, the program `paplay` works flawlessly
+* ffplay - Comes with your distro's FFmpeg package
+* mpv - Comes in mpv package, very good video player as well
 
 ### Windows w/ WSL
 
 Currently no viable options for Windows were identified immediately (and I don't have a great urge to support it either), BUT support for ***WSL only** is available but is still being tested as the current options don't perform well.
 
+### No support
 There is currently not support for the following audio interfaces
-* Whatever wayland does
 * PipeWire
+* aplay from ALSA - doesn't have much support for popular audio file formats
 
-3. Create a sounds folder
+## III. Create a sounds folder
 By default it will look in your config folder `sounds` directory, for example: `/home/eggbert/.config/nvim/sounds/`. This can be changed and spesified with the `sound_directory` option in your config like so:
 ```lua
 {
     sound_directory = "/home/eggbert/.config/nvim/lua/eggbert/sounds/",
 }
 ```
+
+## IV. Other options
+After loading beepboop.nvim, you get access to some usercommands like `:BeepBoopVolume {volum}`, `:BeepBoopEnable`/`Disable` and `:BeepBoopToggle` which all give volume/mute control over beepboop's playback. Additionally, the `enable`
