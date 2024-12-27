@@ -13,7 +13,7 @@ Include the following in your `lazy.nvim` config:
     "EggbertFluffle/beepboop.nvim",
     config = (function()
         require("beepboop").setup({
-            audio_player = "pwplay",
+            audio_player = "paplay",
             sound_map = {
                 -- SOUND MAP DEFENITIONS HERE
             }
@@ -23,7 +23,7 @@ Include the following in your `lazy.nvim` config:
 ```
 
 ## II. Create your sound maps
-A sound map can be made in several different ways. The first way is to attach them to a neovim `auto_command`. A list of all the auto_commands in neovim can be found here (https://neovim.io/doc/user/autocmd.html)[here].
+A sound map can be made in several different ways. The first way is to attach them to a neovim `auto_command`. A list of all the auto_commands in neovim can be found here [https://neovim.io/doc/user/autocmd.html](here).
 ```lua
 {
     sound_map = {
@@ -54,41 +54,37 @@ The third way is to use `key_maps` which are very simmilar to `vim.keymap.set("m
     { key_map = { mode = "n", key_chord = "<C-Enter>" }, sounds = {"stone1.oga", "stone2.oga", "stone3.oga", "stone4.oga"} },
 }
 ```
-These won't override previously defined keymaps for those keychords, but other keymap defenitions *WILL* override these! To avoid this just ensure that your config for beepboop.nvim runs after any keymaps you don't want to override.
+These won't override previously defined keymaps for those keychords, but other keymap defenitions *WILL* override these! To avoid this just ensure that your config for beepboop.nvim *runs after* any keymaps you don't want to override.
 
 Sounds can either be defined at `sound = "SOUND NAME"` which will play the defined sound when the sound map is triggered in some whay. The other option is to use sounds, which will play a random defined sound from the list when the sound_map is triggered, defined like so, `sounds = { "SOUND NAME", "OTHER SOUND NAME", "ONE MORE HEHE" }`.
 
-3. Choose your `audio_player` based on operating system. This is the program that beepboop will call to play the audio files you give it.
+## III. Choose your `audio_player` based on operating system. This is the program that beepboop will call to play the audio files you give it.
 
-### Linux
+### Unix-like (Linux and MacOS) 
 
 * paplay - For PulseAudio, the program `paplay` works flawlessly
 * ffplay - Comes with your distro's FFmpeg package
 * mpv - Comes in mpv package, very good video player as well
+* afplay (***MacOS exclusive***) - Comes default on MacOS, but as far as I can tell **only supports .mp3 and .wav file types**.
 
-### Mac
+WSL is also supported by these audio players but has some issues with latency and is still being tested.
 
-* afplay - Default on MacOS, but as far as I can tell **only supports .mp3 and .wav file types**.
-* paplay - For PulseAudio, the program `paplay` works flawlessly
-* ffplay - Comes with your distro's FFmpeg package
-* mpv - Comes in mpv package, very good video player as well
+### Windows
 
-### Windows w/ WSL
-
-Currently no viable options for Windows were identified immediately (and I don't have a great urge to support it either), BUT support for ***WSL only** is available but is still being tested as the current options don't perform well.
+Currently no viable options for Windows were identified immediately (and I don't have a great urge to support it either), BUT support for **WSL** is available, albeit not very well. (see above)
 
 ### No support
-There is currently not support for the following audio interfaces
-* PipeWire
-* aplay from ALSA - doesn't have much support for popular audio file formats
+* PipeWire (on the todo list)
+* aplay from ALSA (more research) - doesn't have much support for popular audio file formats
+* email me if you have any ideas for more audio players that could be useful
 
-## III. Create a sounds folder
-By default it will look in your config folder `sounds` directory, for example: `/home/eggbert/.config/nvim/sounds/`. This can be changed and spesified with the `sound_directory` option in your config like so:
+## IV. Create a sounds folder
+By default it will look in your config folder `sounds` directory, for example: `~/.config/nvim/sounds/`. This can be changed and spesified with the `sound_directory` option in your config like so:
 ```lua
 {
     sound_directory = "/home/eggbert/.config/nvim/lua/eggbert/sounds/",
 }
 ```
 
-## IV. Other options
+## V. Other options
 After loading beepboop.nvim, you get access to some usercommands like `:BeepBoopVolume {volum}`, `:BeepBoopEnable`/`Disable` and `:BeepBoopToggle` which all give volume/mute control over beepboop's playback. Additionally, the `enable`
