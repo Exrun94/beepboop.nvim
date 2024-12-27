@@ -196,33 +196,32 @@ end)
 
 local initialize_key_maps = (function(sound_map)
 	for trigger_name, sound in pairs(sound_map) do
-		if sound.key_map then
+		if sound.key_map ~= nil then
 			local existing = vim.fn.maparg(sound.key_map.key_chord, sound.key_map.mode, false, true)
-			local callback = function ()
-				M.play_audio(trigger_name)
-			end
 
 			if vim.tbl_isempty(existing) then
-				vim.keymap.set(sound.key_map.mode, sound.key_map.key_chord, callback)
-				return
-			end
-
-			-- TODO: Sould learn what are and consider expressions
-			local chained_func = function()
-				if existing.rhs then
+				vim.keymap.set(sound.key_map.mode, sound.key_map.key_chord, function ()
+					M.play_audio(trigger_name)
 					vim.api.nvim_feedkeys(
-						vim.api.nvim_replace_termcodes(existing.rhs, true, true, true),
+						vim.api.nvim_replace_termcodes(sound.key_map.key_chord, true, true, true),
 						'n',
 						true
 					)
-				else
-					existing.callback()
-				end
-
-				callback()
+				end)
+			else
+				vim.keymap.set(sound.key_map.mode, sound.key_map.key_chord, function ()
+					M.play_audio(trigger_name)
+					if existing.rhs then
+						vim.api.nvim_feedkeys(
+							vim.api.nvim_replace_termcodes(existing.rhs, true, true, true),
+							'n',
+							true
+						)
+					else
+						existing.callback()
+					end
+				end)
 			end
-
-			vim.keymap.set(sound.key_map.mode, sound.key_map.key_chord, chained_func)
 		end
 	end
 end)
@@ -240,6 +239,9 @@ M.play_audio = function(trigger_name)
 end
 
 M.setup = (function(opts)
+	vim = vim or nil
+	if vim == nil then return end
+
 	opts = opts or {}
 
 	M.suppress_warnings = opts.supress_warnings ~= nil
