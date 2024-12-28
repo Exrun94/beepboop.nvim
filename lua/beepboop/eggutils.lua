@@ -14,10 +14,10 @@ M.table_print = function(o)
 end
 
 M.get_os = function()
-	if vim.fn.has("macos") then
-		return "macos"
-	elseif vim.fn.has("linux") then
+	if vim.fn.has("linux") then
 		return "linux"
+	elseif vim.fn.has("macunix") then
+		return "macos"
 	elseif vim.fn.has("windows") then
 		return "windows"
 	else

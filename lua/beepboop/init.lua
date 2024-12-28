@@ -16,11 +16,10 @@ local validate_sound_directory = function(sound_directory)
 	end
 
 	if vim.uv.fs_stat(sound_directory) == nil then
-		error("beepboop.nvim: Could not find sound_directory \"" .. sound_directory .. "\"", 1)
+		print("beepboop.nvim: Could not find sound_directory \"" .. sound_directory .. "\"")
 		return nil
 	end
 
-	print(sound_directory)
 	return sound_directory
 end
 
@@ -29,24 +28,24 @@ local validate_audio_player = function(audio_player)
 	local os = eggutils.get_os()
 
 	if os == "linux" then
-		local linux_audio_players = { "paplay", "mpv", "ffmpeg" }
+		local linux_audio_players = { "paplay", "mpv", "ffplay" }
 		-- default to paplay if no valid linux audi_player is given
 		if not eggutils.has_value(linux_audio_players, audio_player) then
 			if not M.suppress_warnings then
-				error("beepboop.nvim: No audio player configured or the current one is unsupported, defaulting to paplay. Set \"supress_warnings = true\" in your config if this is intentional")
+				print("beepboop.nvim: No audio player configured or the current one is unsupported, defaulting to paplay. Set \"suppress_warnings = true\" in your config if this is intentional.")
 			end
 			return "paplay"
 		end
 	elseif os == "macos" then
-		local mac_os_audio_players = { "afplay", "mpv", "ffmpeg" }
+		local mac_os_audio_players = { "afplay", "mpv", "ffplay" }
 		if not eggutils.has_value(mac_os_audio_players, audio_player) then
 			if not M.suppress_warnings then
-				error("beepboop.nvim: No audio player configured or the current one is unsupported, defaulting to afplay. Set \"supress_warnings = true\" in your config if this is intentional")
+				print("beepboop.nvim: No audio player configured or the current one is unsupported, defaulting to afplay. Set \"suppress_warnings = true\" in your config if this is intentional.")
 			end
 			return "afplay"
 		end
 	elseif os == "windows" then
-		error("beepboop.nvim: We do not support Windows at this time, try windows subsystem for linux.", 1)
+		print("beepboop.nvim: We do not support Windows at this time, try windows subsystem for linux.")
 		return nil
 	end
 	return audio_player
@@ -70,35 +69,38 @@ local validate_sound_map = function(sound_map, sound_directory)
 			trigger_name = map.trigger_name
 		end
 
-		local audio_files
+		local audio_files = nil
 		if map.sounds then
 			audio_files = map.sounds
 		elseif map.sound then
 			audio_files = { map.sound }
 		else
 			if not M.suppress_warnings then
-				error("beepboop.nvim: Trigger received no or invalid/missing audio files. Set \"supress_warnings = true\" in your config if this is intentional", 1)
+				print("beepboop.nvim: Trigger received but missing sound files to trigger. Set \"suppress_warnings = true\" in your config if this is intentional.")
 			end
-			audio_files = {}
 		end
 
-		-- validate that audio files exist
-		for i, af in ipairs(audio_files) do
-			if not vim.uv.fs_stat(sound_directory .. af) then
-				if not M.suppress_warnings then
-					error("beepboop.nvim: Sound \"" .. sound_directory .. af .. "\" doesn't exist. Set \"supress_warnings = true\" in your config if this is intentional", 1)
+		if audio_files then
+			-- validate that audio files exist
+			for i, af in ipairs(audio_files) do
+				if not vim.uv.fs_stat(sound_directory .. af) then
+					if not M.suppress_warnings then
+						print("beepboop.nvim: Sound \"" .. sound_directory .. af .. "\" doesn't exist. Set \"suppress_warnings = true\" in your config if this is intentional.")
+					end
+					audio_files[i] = nil
 				end
-				audio_files[i] = nil
+			end
+
+			if #audio_files > 0 then
+				validated_sound_map[trigger_name] = {
+					auto_command = map.auto_command,
+					key_press = map.key_press,
+					audio_files = audio_files,
+					key_map = map.key_map,
+					volume = eggutils.clamp(map.volume or 100, 0, 100),
+				}
 			end
 		end
-
-		validated_sound_map[trigger_name] = {
-			auto_command = map.auto_command,
-			key_press = map.key_press,
-			audio_files = audio_files,
-			key_map = map.key_map,
-			volume = eggutils.clamp(map.volume or 100, 0, 100),
-		}
 	end
 
 	return validated_sound_map
@@ -131,7 +133,6 @@ local get_audio_player_callback = (function(audio_player, sound_directory)
 			)
 		end)
 	elseif audio_player == "ffplay" then
-		-- TODO: curosr keeps sliding down when sounds are played
 		return (function(audio_files, sound_volume)
 			if not M.sound_enabled then return end
 			os.execute("ffplay " ..
@@ -236,7 +237,7 @@ M.play_audio = function(trigger_name)
 		M.audio_player_callback(M.sound_map[trigger_name].audio_files, M.sound_map[trigger_name].volume)
 	else
 		if not M.suppress_warnings then
-			error("beepboop.nvim: Attempted to trigger sound \"" .. trigger_name .. "\", which hasn'y been defined. Set \"supress_warnings = true\" in your config if this is intentional", 1)
+			error("beepboop.nvim: Attempted to trigger sound \"" .. trigger_name .. "\", which hasn't been defined. Set \"suppress_warnings = true\" in your config if this is intentional.", 1)
 		end
 	end
 end
@@ -247,7 +248,7 @@ M.setup = (function(opts)
 
 	opts = opts or {}
 
-	M.suppress_warnings = opts.supress_warnings ~= nil
+	M.suppress_warnings = opts.suppress_warnings ~= nil
 
 	local sound_directory = validate_sound_directory(opts.sound_directory)
 	if sound_directory == nil then return end
