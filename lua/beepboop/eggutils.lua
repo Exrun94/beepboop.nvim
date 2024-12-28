@@ -14,13 +14,12 @@ M.table_print = function(o)
 end
 
 M.get_os = function()
-	local binary_format = package.cpath:match("%p[\\|/]?%p(%a+)")
-	if binary_format == "dll" then
-		return "windows"
-	elseif binary_format == "so" then
-		return "linux"
-	elseif binary_format == "dylib" then
+	if vim.fn.has("macos") then
 		return "macos"
+	elseif vim.fn.has("linux") then
+		return "linux"
+	elseif vim.fn.has("windows") then
+		return "windows"
 	else
 		return nil
 	end

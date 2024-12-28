@@ -147,7 +147,7 @@ local get_audio_player_callback = (function(audio_player, sound_directory)
 			-- TODO: handle logorithmic sound
 			-- can currently only use wav and mp3 files on mac
 			if not M.sound_enabled then return end
-			os.execute("afplay" ..
+			os.execute("afplay " ..
 				sound_directory ..
 				audio_files[math.random(#audio_files)] ..
 				" -volume " ..
