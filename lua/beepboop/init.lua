@@ -7,6 +7,12 @@ local M = {}
 local validate_sound_directory = function(sound_directory)
 	if sound_directory == nil then
 		sound_directory = vim.fn.stdpath("config") .. "/sounds/"
+	elseif string.sub(sound_directory, 1, 1) == "~" then
+		sound_directory = vim.fn.expand("$HOME") .. string.sub(sound_directory, 2, #sound_directory)
+	end
+
+	if string.sub(sound_directory, #sound_directory) ~= "/" then
+		sound_directory = sound_directory .. "/"
 	end
 
 	if vim.uv.fs_stat(sound_directory) == nil then
@@ -14,10 +20,7 @@ local validate_sound_directory = function(sound_directory)
 		return nil
 	end
 
-	if string.sub(sound_directory, #sound_directory) ~= "/" then
-		sound_directory = sound_directory .. "/"
-	end
-
+	print(sound_directory)
 	return sound_directory
 end
 
@@ -276,17 +279,3 @@ M.setup = (function(opts)
 end)
 
 return M
-
--- init_audio()
-
--- Cool buffer commands
--- VimEnter/VimLeave
--- InsertCharPre
--- BufEnter
--- BufWrite
--- RecordingEnter/RecordingLeave
--- ModeChanged
--- InsertEnter/InsertLeave
--- ExitPre
--- CursorMoved
--- CompleteDone

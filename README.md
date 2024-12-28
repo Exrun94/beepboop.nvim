@@ -79,7 +79,7 @@ Currently no viable options for Windows were identified immediately (and I don't
 * email me if you have any ideas for more audio players that could be useful
 
 ## IV. Create a sounds folder
-By default it will look in your config folder `sounds` directory, for example: `~/.config/nvim/sounds/`. This can be changed and spesified with the `sound_directory` option in your config like so:
+By default it will look in your config folder `sounds` directory, for example: `/home/eggbert/.config/nvim/sounds/`. As of now **paths must be absolute**. This can be changed and spesified with the `sound_directory` option in your config like so:
 ```lua
 {
     sound_directory = "/home/eggbert/.config/nvim/lua/eggbert/sounds/",
