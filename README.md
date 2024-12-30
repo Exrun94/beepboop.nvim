@@ -2,7 +2,7 @@
 
 BeepBoop is a neovim plugin intended to make it easy to incorporate audio cues into neovim. This can be for accessibility reasons, or in my case, just for fun! Check out the demo below for a little taste of whats possible:
 
-### INCLUDE DEMO HERE
+https://github.com/user-attachments/assets/0c3fa223-4d8c-428e-b561-bcbee5ccce8a
 
 ## Installation instructions
 
