@@ -26,7 +26,7 @@ M.get_os = function()
 end
 
 M.has_value = function(list, val)
-	for index, value in ipairs(list) do
+	for _, value in ipairs(list) do
 		if value == val then
 			return true
 		end

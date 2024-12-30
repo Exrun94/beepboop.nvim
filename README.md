@@ -11,14 +11,13 @@ Include the following in your `lazy.nvim` config:
 ```lua
 {
     "EggbertFluffle/beepboop.nvim",
-    config = (function()
-        require("beepboop").setup({
-            audio_player = "paplay",
-            sound_map = {
-                -- SOUND MAP DEFENITIONS HERE
-            }
-        })
-    end),
+    opts = {
+        audio_player = "paplay",
+        max_sounds = 20,
+        sound_map = {
+            -- SOUND MAP DEFENITIONS HERE
+        }
+    }
 }
 ```
 
@@ -33,7 +32,16 @@ A sound map can be made in several different ways. The first way is to attach th
 }
 ```
 
-The second way is to use triggers and then call the trigger somewhere else in lua code.
+The second way is to use `key_maps` which are very simmilar to `vim.keymap.set("mode", "keychord", "rhs")`.
+```lua
+{
+    { key_map = { mode = "n", key_chord = "<leader>pv" }, sound = "chestopen.oga" },
+    { key_map = { mode = "n", key_chord = "<C-Enter>" }, sounds = {"stone1.oga", "stone2.oga", "stone3.oga", "stone4.oga"} },
+}
+```
+These won't override previously defined keymaps for those keychords, but other keymap defenitions *WILL* override these! To avoid this just ensure that your config for beepboop.nvim *runs after* any keymaps you don't want to override.
+
+The final way is to use triggers and then call the trigger somewhere else in lua code/neovim config.
 ```lua
 -- beepboop config
 {
@@ -47,14 +55,6 @@ vim.keymap.set("n", "<leader>boom", function() -- just an example of how it *cou
 end)
 ```
 
-The third way is to use `key_maps` which are very simmilar to `vim.keymap.set("mode", "keychord", "rhs")`.
-```lua
-{
-    { key_map = { mode = "n", key_chord = "<leader>pv" }, sound = "chestopen.oga" },
-    { key_map = { mode = "n", key_chord = "<C-Enter>" }, sounds = {"stone1.oga", "stone2.oga", "stone3.oga", "stone4.oga"} },
-}
-```
-These won't override previously defined keymaps for those keychords, but other keymap defenitions *WILL* override these! To avoid this just ensure that your config for beepboop.nvim *runs after* any keymaps you don't want to override.
 
 Sounds can either be defined at `sound = "SOUND NAME"` which will play the defined sound when the sound map is triggered in some whay. The other option is to use sounds, which will play a random defined sound from the list when the sound_map is triggered, defined like so, `sounds = { "SOUND NAME", "OTHER SOUND NAME", "ONE MORE HEHE" }`.
 
@@ -87,4 +87,4 @@ By default it will look in your config folder `sounds` directory, for example: `
 ```
 
 ## V. Other options
-After loading beepboop.nvim, you get access to some usercommands like `:BeepBoopVolume {volum}`, `:BeepBoopEnable`/`Disable` and `:BeepBoopToggle` which all give volume/mute control over beepboop's playback. Additionally, the `enable`
+After loading beepboop.nvim, you get access to some usercommands like `:BeepBoopVolume {volum}`, `:BeepBoopEnable`/`Disable` and `:BeepBoopToggle` which all give volume/mute control over beepboop's playback. Additionally, the `enable_sound` option will either pick the default state for the result of these commands when neovim is started. Additionally, if you find that there are too many sounds playing, there is a default `max_sounds` of 20, but this property can be altered if desired.
