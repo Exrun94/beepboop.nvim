@@ -87,3 +87,6 @@ By default it will look in your config folder `sounds` directory, for example: `
 
 ### V. Other options
 After loading beepboop.nvim, you get access to some usercommands like `:BeepBoopVolume {volum}`, `:BeepBoopEnable`/`Disable` and `:BeepBoopToggle` which all give volume/mute control over beepboop's playback. Additionally, the `enable_sound` option will either pick the default state for the result of these commands when neovim is started. Additionally, if you find that there are too many sounds playing, there is a default `max_sounds` of 20, but this property can be altered if desired.
+
+## Bug Reporting
+I expect there to be a lot of bugs. If you end up finding one, please feel free to let me know through (or don't) through GitHub Issues or a simple e-mail to hdiambrosio@gmail.com. I'd love the support if you can offer it. Additionally, if you have any ideas, I'd love to hear them and be sure to tell your friends how lit this plugin is.
