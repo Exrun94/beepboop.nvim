@@ -88,5 +88,22 @@ By default it will look in your config folder `sounds` directory, for example: `
 ### V. Other options
 After loading beepboop.nvim, you get access to some usercommands like `:BeepBoopVolume {volum}`, `:BeepBoopEnable`/`Disable` and `:BeepBoopToggle` which all give volume/mute control over beepboop's playback. Additionally, the `enable_sound` option will either pick the default state for the result of these commands when neovim is started. Additionally, if you find that there are too many sounds playing, there is a default `max_sounds` of 20, but this property can be altered if desired.
 
+### VI. Plugin Compatability
+Just some notes on using other plugins that are known to or may conflict with beepboop.nvim
+
+#### nvim-autopairs
+If using nvim-autopairs this will not allow beepboop.nvim to map sounds to <BS> (backspace key) or <CR> (enter key) by default. If you don't intend to map these keys to sounds, there's no conflict. If you do though, you need to turn off the maps for autopairs to <BS> and or  <CR> by including the following in your nvim-autopairs config:
+```lua
+{
+    "windwp/nvim-autopairs",
+    config = function()
+        require("nvim-autopairs").setup({
+            map_bs = false, -- removes map to <BS>
+            map_cr = false  -- removes map to <CR>
+        })
+    end,
+},
+```
+
 ## Bug Reporting
 I expect there to be a lot of bugs. If you end up finding one, please feel free to let me know through (or don't) through GitHub Issues or a simple e-mail to hdiambrosio@gmail.com. I'd love the support if you can offer it. Additionally, if you have any ideas, I'd love to hear them and be sure to tell your friends how lit this plugin is.
