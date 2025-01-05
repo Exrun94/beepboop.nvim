@@ -63,6 +63,7 @@ Sounds can either be defined at `sound = "SOUND NAME"` which will play the defin
 #### Unix-like (Linux and MacOS) 
 
 * paplay - For PulseAudio, the program `paplay` works flawlessly
+* pw-play - For users of PipeWire or anyone using its client
 * ffplay - Comes with your distro's FFmpeg package
 * mpv - Comes in mpv package, very good video player as well
 * afplay (***MacOS exclusive***) - Comes default on MacOS, but as far as I can tell **only supports .mp3 and .wav file types**.
