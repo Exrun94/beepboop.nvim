@@ -225,35 +225,42 @@ end)
 local initialize_key_maps = (function(sound_map)
 	for trigger_name, sound in pairs(sound_map) do
 		if sound.key_map ~= nil then
-			local existing = vim.fn.maparg(sound.key_map.key_chord, sound.key_map.mode, false, true)
-
-			if vim.tbl_isempty(existing) then
+			if sound.key_map.blocking == nil then sound.key_map.blocking = false end
+			if sound.key_map.blocking then
 				vim.keymap.set(sound.key_map.mode, sound.key_map.key_chord, (function()
 					M.play_audio(trigger_name)
-					vim.api.nvim_feedkeys(
-						vim.api.nvim_replace_termcodes(sound.key_map.key_chord, true, true, true),
-						'n',
-						true
-					)
-				end),
-					{ expr = true })
+				end))
 			else
-				vim.keymap.set(sound.key_map.mode, sound.key_map.key_chord, (function()
-					M.play_audio(trigger_name)
-					if existing.rhs ~= nil and not vim.tbl_isempty(existing.rhs) then
-						if existing.expr == 1 then
+				local existing = vim.fn.maparg(sound.key_map.key_chord, sound.key_map.mode, false, true)
+
+				if vim.tbl_isempty(existing) then
+					vim.keymap.set(sound.key_map.mode, sound.key_map.key_chord, (function()
+						M.play_audio(trigger_name)
+						vim.api.nvim_feedkeys(
+							vim.api.nvim_replace_termcodes(sound.key_map.key_chord, true, true, true),
+							'n',
+							true
+						)
+					end),
+						{ expr = true })
+				else
+					vim.keymap.set(sound.key_map.mode, sound.key_map.key_chord, (function()
+						M.play_audio(trigger_name)
+						if existing.rhs ~= nil and not vim.tbl_isempty(existing.rhs) then
+							if existing.expr == 1 then
+							else
+								vim.api.nvim_feedkeys(
+									vim.api.nvim_replace_termcodes(existing.rhs, true, true, true),
+									'n',
+									true
+								)
+							end
 						else
-							vim.api.nvim_feedkeys(
-								vim.api.nvim_replace_termcodes(existing.rhs, true, true, true),
-								'n',
-								true
-							)
+							existing.callback()
 						end
-					else
-						existing.callback()
-					end
-				end),
-					{ expr = true })
+					end),
+						{ expr = true })
+				end
 			end
 		end
 	end

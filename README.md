@@ -35,11 +35,11 @@ A sound map can be made in several different ways. The first way is to attach th
 The second way is to use `key_maps` which are very simmilar to `vim.keymap.set("mode", "keychord", "rhs")`.
 ```lua
 {
-    { key_map = { mode = "n", key_chord = "<leader>pv" }, sound = "chestopen.oga" },
-    { key_map = { mode = "n", key_chord = "<C-Enter>" }, sounds = {"stone1.oga", "stone2.oga", "stone3.oga", "stone4.oga"} },
+    { key_map = { mode = "n", key_chord = "<leader>pv", blocking = false }, sound = "chestopen.oga" },
+    { key_map = { mode = "n", key_chord = "<C-Enter>", blocking = true }, sounds = {"stone1.oga", "stone2.oga", "stone3.oga", "stone4.oga"} },
 }
 ```
-These won't override previously defined keymaps for those keychords, but other keymap defenitions *WILL* override these! To avoid this just ensure that your config for beepboop.nvim *runs after* any keymaps you don't want to override.
+These won't override previously defined keymaps for those keychords by default, but other keymap defenitions *WILL* override these! To avoid this just ensure that your config for beepboop.nvim *runs after* any keymaps you don't want to override. There is also the option for blocking and non-blocking keymaps to sounds. This means, when blocking is enabled, it will be like a normal keymap and *OVERRIDE* any previously set keymap, whereas when blocking is disabled, any previously made keymap will still play in addition to the sound.
 
 The final way is to use triggers and then call the trigger somewhere else in lua code/neovim config.
 ```lua
@@ -90,7 +90,8 @@ By default it will look in your config folder `sounds` directory, for example: `
 ```
 
 ### V. Other options
-After loading beepboop.nvim, you get access to some usercommands like `:BeepBoopVolume {volum}`, `:BeepBoopEnable`/`Disable` and `:BeepBoopToggle` which all give volume/mute control over beepboop's playback. Additionally, the `enable_sound` option will either pick the default state for the result of these commands when neovim is started. Additionally, if you find that there are too many sounds playing, there is a default `max_sounds` of 20, but this property can be altered if desired.
+After loading beepboop.nvim, you get access to some usercommands like `:BeepBoopVolume {volum}`, `:BeepBoopEnable`/`Disable` and `:BeepBoopToggle` which all give volume/mute control over beepboop's playback. Additionally, the `enable_sound` option will either pick the default state for the result of these commands when neovim is started.
+* If you find that there are too many sounds playing, there is a default `max_sounds` of 20, but this property can be altered if desired.
 
 ### VI. Plugin Compatability
 Just some notes on using other plugins that are known to or may conflict with beepboop.nvim
