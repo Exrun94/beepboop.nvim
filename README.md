@@ -45,13 +45,16 @@ The final way is to use triggers and then call the trigger somewhere else in lua
 ```lua
 -- beepboop config
 {
-    trigger_name = "boom",
-    sound = "vineboom.mp3",
+    -- The sound_map below can EITHER be triggered by the key_chord OR a call to require("beepboop").play_audio("boom")
+    { trigger_name = "boom", key_map = { mode = "n", key_chord = "<leader>pv" }, sound = "boom.oga" },
+
+    -- The sound_map below can ONLY be tirggered by a call to require("beepboop").play_audio("bap")
+    { trigger_name = "bap", sound = "bap.oga" },
 }
 
 -- other file
 vim.keymap.set("n", "<leader>boom", function() -- just an example of how it *could* be called
-    require("beepboop").play_audio("boom")
+    require("beepboop").play_audio("bap")
 end)
 ```
 
