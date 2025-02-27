@@ -16,7 +16,8 @@ Include the following in your `lazy.nvim` config:
         max_sounds = 20,
         sound_map = {
             -- SOUND MAP DEFENITIONS HERE
-        }
+        },
+        loop_sound = "background_music.oga" -- Optional: special sound for looping
     }
 }
 ```
@@ -93,7 +94,33 @@ By default it will look in your config folder `sounds` directory, for example: `
 After loading beepboop.nvim, you get access to some usercommands like `:BeepBoopVolume {volum}`, `:BeepBoopEnable`/`Disable` and `:BeepBoopToggle` which all give volume/mute control over beepboop's playback. Additionally, the `enable_sound` option will either pick the default state for the result of these commands when neovim is started.
 * If you find that there are too many sounds playing, there is a default `max_sounds` of 20, but this property can be altered if desired.
 
-### VI. Plugin Compatability
+### VI. Loop Sound
+The plugin supports a special looping sound feature. This allows you to configure a background sound that will play continuously until stopped.
+
+#### Configuration
+Specify a loop sound in your plugin configuration:
+```lua
+{
+    "EggbertFluffle/beepboop.nvim",
+    opts = {
+        -- other options
+        loop_sound = "my_background_music.oga" 
+    }
+}
+```
+
+#### Commands
+- `:BeepBoopLoopStart` - Start playing the configured loop sound
+- `:BeepBoopLoopStop` - Stop the currently playing loop sound
+
+#### Notes
+- The loop sound can only be triggered manually with the command
+- If a user uses tmux to run multiple neovim sessions, the loop sound will only play in one session at a time
+- If the loop sound is already playing in any session, attempting to start it again will show a message
+- For best results, use the `mpv` or `ffplay` audio player, as they have native support for looping
+- When using `paplay` or `pw-play`, the plugin will attempt to use `mpv` as a fallback for loop sounds
+
+### VII. Plugin Compatability
 Just some notes on using other plugins that are known to or may conflict with beepboop.nvim
 
 #### nvim-autopairs
