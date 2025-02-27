@@ -12,7 +12,6 @@ Include the following in your `lazy.nvim` config:
 {
     "EggbertFluffle/beepboop.nvim",
     opts = {
-        audio_player = "paplay",
         max_sounds = 20,
         sound_map = {
             -- SOUND MAP DEFENITIONS HERE
@@ -62,25 +61,17 @@ end)
 
 Sounds can either be defined at `sound = "SOUND NAME"` which will play the defined sound when the sound map is triggered in some whay. The other option is to use sounds, which will play a random defined sound from the list when the sound_map is triggered, defined like so, `sounds = { "SOUND NAME", "OTHER SOUND NAME", "ONE MORE HEHE" }`.
 
-### III. Choose your `audio_player` based on operating system. This is the program that beepboop will call to play the audio files you give it.
+### III. Audio Player
 
-#### Unix-like (Linux and MacOS) 
+This plugin uses `paplay` exclusively to play audio files. Make sure you have the PulseAudio utilities installed on your Linux system:
 
-* paplay - For PulseAudio, the program `paplay` works flawlessly
-* pw-play - For users of PipeWire or anyone using its client
-* ffplay - Comes with your distro's FFmpeg package
-* mpv - Comes in mpv package, very good video player as well
-* afplay (***MacOS exclusive***) - Comes default on MacOS, but as far as I can tell **only supports .mp3 and .wav file types**.
+* On Ubuntu/Debian: `sudo apt-get install pulseaudio-utils`
+* On Fedora: `sudo dnf install pulseaudio-utils`
+* On Arch: `sudo pacman -S pulseaudio-utils`
 
-WSL is also supported by these audio players but has some issues with latency and is still being tested.
+Note that this plugin only supports Linux systems with PulseAudio. Windows and macOS are not supported.
 
-#### Windows
-
-Currently no viable options for Windows were identified immediately (and I don't have a great urge to support it either), BUT support for **WSL** is available, albeit not very well. (see above)
-
-#### No support
-* aplay from ALSA (more research) - doesn't have much support for popular audio file formats
-* email me if you have any ideas for more audio players that could be useful
+If you're using PipeWire as your audio server, you'll still have `paplay` available through PipeWire's PulseAudio compatibility layer.
 
 ### IV. Create a sounds folder
 By default it will look in your config folder `sounds` directory, for example: `/home/eggbert/.config/nvim/sounds/`, or the equivalent: `~/.config/nvim/sounds`. This can be changed and spesified with the `sound_directory` option in your config like so:
@@ -115,10 +106,10 @@ Specify a loop sound in your plugin configuration:
 
 #### Notes
 - The loop sound can only be triggered manually with the command
-- If a user uses tmux to run multiple neovim sessions, the loop sound will only play in one session at a time
-- If the loop sound is already playing in any session, attempting to start it again will show a message
-- For best results, use the `mpv` or `ffplay` audio player, as they have native support for looping
-- When using `paplay` or `pw-play`, the plugin will attempt to use `mpv` as a fallback for loop sounds
+- The plugin uses `pgrep` to detect if a looping sound is already playing
+- If a looping sound is already playing, attempting to start it again will show a message
+- When you exit Vim or call `:BeepBoopLoopStop`, the plugin will automatically kill any running loop sound processes
+- Only one loop sound can play at a time across all Neovim instances
 
 ### VII. Plugin Compatability
 Just some notes on using other plugins that are known to or may conflict with beepboop.nvim
